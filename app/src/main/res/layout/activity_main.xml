@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.joe.accelermeter.MainActivity">
+    <TextView
+        android:id="@+id/x_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="X"
+        android:layout_marginTop="32dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/y_val"
+        android:layout_alignStart="@+id/y_val" />
+    <TextView
+        android:id="@+id/y_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="Y"
+        android:layout_marginTop="44dp"
+        android:layout_below="@+id/x_val"
+        android:layout_alignLeft="@+id/z_val"
+        android:layout_alignStart="@+id/z_val" />
+    <TextView
+        android:id="@+id/z_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="Z"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/y_val"
+        android:layout_centerHorizontal="true" />
+    <TextView
+        android:id="@+id/isMoving"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="default"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/z_val"
+        android:layout_centerHorizontal="true" />
+    <TextView
+        android:id="@+id/mAccelText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="mAccelText"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/isMoving"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/txtview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:text="mAccelText"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/mAccelText"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>
+
+    <!--</android.support.constraint.ConstraintLayout>-->
