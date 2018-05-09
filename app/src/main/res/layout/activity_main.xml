@@ -54,15 +54,17 @@
         android:layout_below="@+id/isMoving"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:id="@+id/txtview"
+    <Button
+        android:id="@+id/storeData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="25sp"
-        android:text="mAccelText"
-        android:layout_marginTop="55dp"
-        android:layout_below="@+id/mAccelText"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="22dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp"
+        android:text="Store" />
 
 
 </RelativeLayout>

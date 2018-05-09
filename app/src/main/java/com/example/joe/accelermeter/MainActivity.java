@@ -9,33 +9,51 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Click;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ViewById;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
 //public class MainActivity extends AppCompatActivity implements AccelerMeterCallback.iSensorCallback {
+@EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
 
     private SensorManager sensorManager;
     TextView x_val;
     TextView y_val;
     TextView z_val;
-    TextView isMoving;
-    TextView mAccelText;
-//    Queue<String> queue = new LinkedList<String>();
-//    private AccelerMeterCallback _accelerMeterCallback = null;
+
+    @ViewById Button storeData;
+
+    @ViewById TextView mAccelText;
+    @ViewById TextView isMoving;
+    Queue<Float> accelQueue = new LinkedList<>();
+    Queue<String> deltaQueue = new LinkedList<>();
+    Queue<String> activeQueue = new LinkedList<>();
+    Queue<Integer> thresholdQueue = new LinkedList<>();
+
+
+    //    private AccelerMeterCallback _accelerMeterCallback = null;
     private float[] mGravity;
     private float mAccel;
     private float mAccelCurrent = SensorManager.GRAVITY_EARTH;
     private float mAccelLast = SensorManager.GRAVITY_EARTH;
-    TextView tv;
     private long perScannedTime = 0;
     private int stopCount = 0;
     private int MOTION_THRESHOLD;
-
+    private final String TAG = "MainActivity";
+    private long startTime = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv=(TextView)findViewById(R.id.txtview);
         x_val = (TextView) findViewById(R.id.x_val);
         y_val = (TextView) findViewById(R.id.y_val);
         z_val = (TextView) findViewById(R.id.z_val);
@@ -67,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (sensorEvent.sensor.getType()== Sensor.TYPE_ACCELEROMETER){
 
             if(perScannedTime == 0){
+                startTime = System.currentTimeMillis();
                 perScannedTime = sensorEvent.timestamp;
             }
             if(perScannedTime !=  sensorEvent.timestamp){
@@ -81,10 +100,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = mGravity[1];
             float z = mGravity[2];
 
-//            x_val.setText(String.valueOf(x));
-//            y_val.setText(String.valueOf(y));
-//            z_val.setText(String.valueOf(z));
-
             mAccelLast = mAccelCurrent;
             mAccelCurrent = (float) Math.sqrt(x*x + y*y + z*z);
             float delta = mAccelCurrent - mAccelLast;
@@ -92,29 +107,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             // Make this higher or lower according to how much
             // motion you want to detect
-            mAccelText.setText("9.8 : " +  mAccel);
-            if(mAccel > 0.6){
+            mAccelText.setText("mAccel = " +  mAccel);
+            accelQueue.offer(mAccel);
+            thresholdQueue.offer(MOTION_THRESHOLD);
+
+            if(mAccel > 0.8){
                 // do something
-//                System.out.println("[mAccel] = " + mAccel);
+                activeQueue.offer("Moving");
                 stopCount = 0;
             }else{
+                activeQueue.offer("Stop");
                 stopCount++;
             }
-//            System.out.println("[MOTION_THRESHOLD]" + MOTION_THRESHOLD);
             if(stopCount >= MOTION_THRESHOLD){
                 isMoving.setText("stop");
             }else{
                 isMoving.setText("moving");
-
             }
-
-
         }
 
     }
 
     @UiThread
     private void updateThreshold(long delta){
+
+        deltaQueue.offer(Long.toString(delta));
 
         if(10 <= delta && delta <= 29){ //20
             MOTION_THRESHOLD = 45;
@@ -138,5 +155,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+    @Click(R.id.storeData)
+    void storeResult() {
+
+        doSaveResult();
+
+    }
+
+    @Background
+    void doSaveResult() {
+
+
+        ExcelBuilder.initExcel();
+        Log.d(TAG, "[accelQueue Size] = " + accelQueue.size());
+        while(!accelQueue.isEmpty()) {
+            ExcelBuilder.setAccel(accelQueue.poll());
+        }
+
+        while(!deltaQueue.isEmpty()){
+            ExcelBuilder.setDelta(deltaQueue.poll());
+        }
+
+        while(!activeQueue.isEmpty()){
+            ExcelBuilder.setActive(activeQueue.poll());
+        }
+        ExcelBuilder.setDuration(System.currentTimeMillis() - startTime);
+
+        ExcelBuilder.saveExcelFile(this, "acceleroMeter");
+
+    }
 
 }
