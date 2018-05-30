@@ -26,10 +26,11 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
 
     private SensorManager sensorManager;
-    TextView x_val;
-    TextView y_val;
-    TextView z_val;
 
+    @ViewById TextView x_val;
+    @ViewById TextView y_val;
+    @ViewById TextView z_val;
+    @ViewById TextView gravity;
     @ViewById Button storeData;
 
     @ViewById TextView mAccelText;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Queue<String> deltaQueue = new LinkedList<>();
     Queue<String> activeQueue = new LinkedList<>();
     Queue<Integer> thresholdQueue = new LinkedList<>();
+    Queue<Float> mAccelCurrentQueue = new LinkedList<>();
 
 
     //    private AccelerMeterCallback _accelerMeterCallback = null;
@@ -50,13 +52,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int MOTION_THRESHOLD;
     private final String TAG = "MainActivity";
     private long startTime = 0;
+    private float gap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        x_val = (TextView) findViewById(R.id.x_val);
-        y_val = (TextView) findViewById(R.id.y_val);
-        z_val = (TextView) findViewById(R.id.z_val);
+//        x_val = (TextView) findViewById(R.id.x_val);
+//        y_val = (TextView) findViewById(R.id.y_val);
+//        z_val = (TextView) findViewById(R.id.z_val);
         isMoving = (TextView) findViewById(R.id.isMoving);
         mAccelText = (TextView) findViewById(R.id.mAccelText);
 
@@ -102,16 +105,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             mAccelLast = mAccelCurrent;
             mAccelCurrent = (float) Math.sqrt(x*x + y*y + z*z);
-            float delta = mAccelCurrent - mAccelLast;
-            mAccel = mAccel * 0.9f + delta;
+//            float delta = mAccelCurrent - mAccelLast;
+            float delta = mAccelCurrent - 9.8f;
 
+//            mAccel = mAccel * 0.9f + delta * 0.1f;
+            mAccel = delta;
             // Make this higher or lower according to how much
             // motion you want to detect
+            x_val.setText(String.valueOf(x));
+            y_val.setText(String.valueOf(y));
+            z_val.setText(String.valueOf(z));
+            gravity.setText(String.valueOf(mAccelCurrent));
             mAccelText.setText("mAccel = " +  mAccel);
+            mAccelCurrentQueue.offer(mAccelCurrent);
             accelQueue.offer(mAccel);
             thresholdQueue.offer(MOTION_THRESHOLD);
 
-            if(mAccel > 0.8){
+            if(mAccel> 0.8){
                 // do something
                 activeQueue.offer("Moving");
                 stopCount = 0;
@@ -146,7 +156,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }else{
             MOTION_THRESHOLD = 7;
         }
-
+        MOTION_THRESHOLD = (int) (1600 / delta);
+        if(MOTION_THRESHOLD <= 80 ){
+            gap = 0.8f;
+        }if(MOTION_THRESHOLD >= 80 ){
+            gap = 1.0f;
+        }
+        System.out.println("[MOTION_THRESHOLD] = " + MOTION_THRESHOLD);
     }
 
     @Override
@@ -159,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     void storeResult() {
 
         doSaveResult();
+        sensorManager.unregisterListener(this);
 
     }
 
@@ -168,6 +185,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         ExcelBuilder.initExcel();
         Log.d(TAG, "[accelQueue Size] = " + accelQueue.size());
+        Log.d(TAG, "[delta Size] = " + deltaQueue.size());
+        Log.d(TAG, "[active Size] = " + activeQueue.size());
+        Log.d(TAG, "[accelQueue Size] = " + accelQueue.size());
+
         while(!accelQueue.isEmpty()) {
             ExcelBuilder.setAccel(accelQueue.poll());
         }
@@ -178,6 +199,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         while(!activeQueue.isEmpty()){
             ExcelBuilder.setActive(activeQueue.poll());
+        }
+
+        while(!mAccelCurrentQueue.isEmpty()){
+            ExcelBuilder.setmAccelCurrent(mAccelCurrentQueue.poll());
         }
         ExcelBuilder.setDuration(System.currentTimeMillis() - startTime);
 

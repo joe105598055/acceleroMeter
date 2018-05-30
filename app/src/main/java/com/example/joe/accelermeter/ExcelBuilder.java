@@ -31,6 +31,7 @@ public class ExcelBuilder {
     public static int rowAccelIndex = 1;
     public static int rowDeltaIndex = 1;
     public static int rowActiveIndex = 1;
+    public static int rowmAccelCurrent = 1;
 
 
     public static int colIndex = 0;
@@ -72,8 +73,8 @@ public class ExcelBuilder {
 
     public static void setDuration(long duration){
         Sheet AMSheet = _wb.getSheet("AcceleroMeter");
-        AMSheet.getRow(0).createCell(3).setCellValue("Duration");
-        AMSheet.getRow(1).createCell(3).setCellValue(duration);
+        AMSheet.getRow(0).createCell(4).setCellValue("Duration");
+        AMSheet.getRow(1).createCell(4).setCellValue(duration);
     }
     public static void setDelta(String delta) {
         System.out.println("[setAccel]");
@@ -82,11 +83,16 @@ public class ExcelBuilder {
         rowDeltaIndex++;
     }
 
-    public static void setActive(String delta) {
+    public static void setActive(String active) {
         System.out.println("[setActive]");
         Sheet AMSheet = _wb.getSheet("AcceleroMeter");
-        AMSheet.getRow(rowActiveIndex).createCell(2).setCellValue(delta);
+        AMSheet.getRow(rowActiveIndex).createCell(2).setCellValue(active);
         rowActiveIndex++;
+    }
+    public static void setmAccelCurrent(float accelCurrent){
+        Sheet AMSheet = _wb.getSheet("AcceleroMeter");
+        AMSheet.getRow(rowmAccelCurrent).createCell(3).setCellValue(accelCurrent);
+        rowmAccelCurrent++;
     }
 
     public static boolean saveExcelFile(Context context, String fileName) {
